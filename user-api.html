@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        User by Id
+    </title>
+</head>
+
+<body>
+    <div id="root">
+
+    </div>
+
+    <script src="../fundamentals/js/react.development.js"></script>
+    <script src="../fundamentals/js/react-dom.development.js"></script>
+    <script src="../fundamentals/js/babel.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <script type="text/babel">
+        const rootHandle = document.getElementById('root')
+
+        const { useState } = React 
+
+        const App = (props) => {
+            const [user, setUser] = useState({})
+            const [error, setError] = useState('') 
+
+            const userCallback = (user) => {
+                setUser(user)
+                setError('')
+            }
+
+            const errorCallback = (msg) => {
+                setError(msg)
+                setUser({})
+            }
+
+            return (
+                <div>
+                    <h1>Search by user id </h1> 
+                    <UserForm 
+                        userCallback={userCallback} 
+                        errorCallback={errorCallback}
+                    /> 
+
+                    <UserInfo 
+                        user={user}
+                        error={error}
+                    />
+
+                </div> 
+            )
+        }
+
+        const UserForm = (props) => {
+            const { userCallback, errorCallback } = props
+            const [id, setId] = useState('')
+
+            const handleChange = (e) => {
+                const input = e.target.value 
+                setId(input) 
+            }
+
+            const handleSubmit = (e) => {
+                e.preventDefault() 
+                axios.get(`https://jsonplaceholder.typicode.com/users/${id}`)
+                    .then((response) => {
+                        const user = response.data 
+                        userCallback(user) 
+                        setId('')
+                    })
+                    .catch((err) => {
+                        errorCallback(err.message) 
+                    })
+            }
+            
+            return (
+                <form onSubmit={handleSubmit}>
+                    <label>Enter Id</label> <br /> 
+                    <input 
+                        type="text" 
+                        value={id} 
+                        onChange={handleChange} 
+                    /> <br /> 
+
+                    <input type="submit" value="Search..." /> 
+                </form> 
+            )
+        }
+
+        const UserInfo = (props) => {
+            const { user, error } = props 
+            return (
+                <div>
+                    { error && <p> Record Not found </p> } 
+                    { (Object.keys(user).length > 0)  && <h1> {user.name} {user.email} {user.address.city} </h1> }
+                </div> 
+            )
+        }
+
+        ReactDOM.render(<App />, rootHandle)
+    </script>
+</body>
+
+</html>
